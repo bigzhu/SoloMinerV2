@@ -105,17 +105,28 @@ def bitcoin_miner(t, restarted=False):
         print(Fore.MAGENTA, "[", timer(), "]", Fore.BLUE, "[*] Bitcoin Miner Restarted")
         time.sleep(5)
 
+    if ctx.nbits is None:
+        print("ctx.nbits is None")
+        return
     target = (ctx.nbits[2:] + "00" * (int(ctx.nbits[:2], 16) - 3)).zfill(64)
+
+    if ctx.extranonce2_size is None:
+        print("ctx.extranonce2_size is None")
+        return
     extranonce2 = hex(random.randint(0, 2**32 - 1))[2:].zfill(
         2 * ctx.extranonce2_size
     )  # create random
 
+    if ctx.coinb1 is None or ctx.extranonce1 is None:
+        return
     coinbase = ctx.coinb1 + ctx.extranonce1 + extranonce2 + ctx.coinb2
     coinbase_hash_bin = hashlib.sha256(
         hashlib.sha256(binascii.unhexlify(coinbase)).digest()
     ).digest()
 
     merkle_root = coinbase_hash_bin
+    if ctx.merkle_branch is None:
+        return
     for h in ctx.merkle_branch:
         merkle_root = hashlib.sha256(
             hashlib.sha256(merkle_root + binascii.unhexlify(h)).digest()
